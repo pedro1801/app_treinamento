@@ -1,7 +1,7 @@
-import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart' show rootBundle;
 import '../../shared/widgets/app_sidebar.dart';
+import '../../shared/services/videos_db.dart';
+import '../criar_videos/modal_criar_pasta.dart';
 
 class CriarVideos extends StatefulWidget {
   const CriarVideos({super.key});
@@ -20,8 +20,9 @@ class _CriarVideosState extends State<CriarVideos> {
   }
 
   Future<List<String>> _carregarPastas() async {
-    final jsonStr = await rootBundle.loadString('assets/data/videos.json');
-    final Map<String, dynamic> data = jsonDecode(jsonStr);
+    final bd = VideosDb();
+    final jsonStr = await bd.readAll();
+    final Map<String, dynamic> data = jsonStr;
 
     // As “pastas” são as chaves do primeiro nível
     return data.keys.toList()..sort();
@@ -45,7 +46,10 @@ class _CriarVideosState extends State<CriarVideos> {
             children: [
               // topo
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 12,
+                ),
                 child: Row(
                   children: [
                     Builder(
@@ -67,16 +71,15 @@ class _CriarVideosState extends State<CriarVideos> {
                 ),
               ),
 
-              // lista de pastas
+              // grid de pastas + botão criar
               Expanded(
                 child: FutureBuilder<List<String>>(
                   future: _pastasFuture,
                   builder: (context, snapshot) {
                     if (snapshot.connectionState != ConnectionState.done) {
-                      return const Center(
-                        child: CircularProgressIndicator(),
-                      );
+                      return const Center(child: CircularProgressIndicator());
                     }
+
                     if (snapshot.hasError) {
                       return Center(
                         child: Text(
@@ -87,41 +90,39 @@ class _CriarVideosState extends State<CriarVideos> {
                     }
 
                     final pastas = snapshot.data ?? [];
-                    if (pastas.isEmpty) {
-                      return const Center(
-                        child: Text(
-                          'Nenhuma pasta encontrada.',
-                          style: TextStyle(color: Colors.white),
-                        ),
-                      );
-                    }
 
-                    return ListView.builder(
+                    // agora mesmo se não tiver pastas, a grid ainda mostra o botão "Criar pasta"
+                    return GridView.builder(
                       padding: const EdgeInsets.all(16),
-                      itemCount: pastas.length,
-                      itemBuilder: (context, i) {
-                        final nome = pastas[i];
-                        return Container(
-                          margin: const EdgeInsets.only(bottom: 12),
-                          decoration: BoxDecoration(
-                            color: Colors.white.withOpacity(0.12),
-                            borderRadius: BorderRadius.circular(14),
-                            border: Border.all(color: Colors.white.withOpacity(0.18)),
+                      gridDelegate:
+                          const SliverGridDelegateWithFixedCrossAxisCount(
+                            crossAxisCount: 2, // 2 quadrados por linha
+                            crossAxisSpacing: 12,
+                            mainAxisSpacing: 12,
+                            childAspectRatio: 1.0, // quadrado
                           ),
-                          child: ListTile(
-                            leading: const Icon(Icons.folder_rounded, color: Colors.white),
-                            title: Text(
-                              nome,
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontWeight: FontWeight.w700,
-                              ),
-                            ),
-                            trailing: const Icon(Icons.chevron_right, color: Colors.white70),
+                      itemCount:
+                          pastas.length + 1, // +1 por causa do "Criar pasta"
+                      itemBuilder: (context, index) {
+                        // primeiro item: criar pasta
+                        if (index == 0) {
+                          return _GridCard(
+                            icon: Icons.create_new_folder_rounded,
+                            title: 'Criar pasta',
                             onTap: () {
-                              // depois a gente abre a pasta e lista os vídeos dentro dela
+                              showCreateFolderModal(context);
                             },
-                          ),
+                          );
+                        }
+
+                        // demais itens: pastas do JSON
+                        final nome = pastas[index - 1];
+
+                        return _GridCard(
+                          icon: Icons.folder_rounded,
+                          title: nome,
+                          onTap: () {
+                          },
                         );
                       },
                     );
@@ -130,6 +131,51 @@ class _CriarVideosState extends State<CriarVideos> {
               ),
             ],
           ),
+        ),
+      ),
+    );
+  }
+}
+
+class _GridCard extends StatelessWidget {
+  final IconData icon;
+  final String title;
+  final VoidCallback onTap;
+
+  const _GridCard({
+    required this.icon,
+    required this.title,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      borderRadius: BorderRadius.circular(14),
+      onTap: onTap,
+      child: Container(
+        decoration: BoxDecoration(
+          color: Colors.white.withOpacity(0.12),
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(color: Colors.white.withOpacity(0.18)),
+        ),
+        padding: const EdgeInsets.all(14),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(icon, color: Colors.white, size: 40),
+            const SizedBox(height: 10),
+            Text(
+              title,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+              textAlign: TextAlign.center,
+              style: const TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+          ],
         ),
       ),
     );
