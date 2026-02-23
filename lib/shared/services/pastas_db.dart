@@ -4,7 +4,7 @@ import 'dart:io';
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:path_provider/path_provider.dart';
 
-class VideosDb {
+class PastasBb {
   static const String _assetPath = 'assets/data/videos.json';
   static const String _fileName = 'videos.json';
 
@@ -50,7 +50,11 @@ class VideosDb {
     if (name.isEmpty) return;
 
     final data = await readAll();
-    data.putIfAbsent(name, () => <String, dynamic>{});
+    data.putIfAbsent(name, () => <String, dynamic>{
+      '_visible': true, 
+      'pdf': {},
+      'videos': {}
+    });
     await writeAll(data);
   }
 

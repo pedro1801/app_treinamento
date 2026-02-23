@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'features/welcome/welcome_page.dart';
-import 'features/criar_videos/criar_videos.dart';
+import 'features/criar_treinamentos/criar_treinamento.dart';
 
 void main() {
   runApp(const MyApp());
@@ -18,7 +18,7 @@ class MyApp extends StatelessWidget {
       initialRoute: '/',
       routes: {
         '/': (context) => const WelcomePage(),
-        '/criar_videos': (context) => const CriarVideos(),
+        '/criar_treinamento': (context) => const CriarTreinamento(),
       },
     );
   }

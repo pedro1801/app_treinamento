@@ -29,7 +29,7 @@ class AppSidebar extends StatelessWidget {
                   ),
                   ListTile(
                     leading: const Icon(Icons.create_new_folder_outlined),
-                    title: const Text('Cirar Videos'),
+                    title: const Text('Cirar Treinamento'),
                     onTap: () {
                       Navigator.of(context).pop(); // fecha o drawer
 
@@ -37,7 +37,7 @@ class AppSidebar extends StatelessWidget {
                         Navigator.of(
                           context,
                           rootNavigator: true,
-                        ).pushNamed('/criar_videos');
+                        ).pushNamed('/criar_treinamento');
                       });
                     },
                   ),

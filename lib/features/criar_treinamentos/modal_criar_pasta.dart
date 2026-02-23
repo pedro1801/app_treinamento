@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
-import '../../shared/services/videos_db.dart';
+import '../../shared/services/pastas_db.dart';
 import '../../shared/modals/modal_success_erro.dart';
 
 Future<String?> showCreateFolderModal(BuildContext context) {
   final controller = TextEditingController();
-  final db = VideosDb();
+  final db = PastasBb();
 
   return showDialog<String>(
     context: context,
@@ -26,7 +26,7 @@ Future<String?> showCreateFolderModal(BuildContext context) {
             child: const Text('Cancelar'),
           ),
           ElevatedButton(
-           onPressed: () async {
+            onPressed: () async {
               final nome = controller.text.trim();
 
               if (nome.isEmpty) {
@@ -35,7 +35,6 @@ Future<String?> showCreateFolderModal(BuildContext context) {
                   type: ResultType.error,
                   title: 'Erro',
                   message: 'O campo com o nome não foi preenchido',
-                  goToRoute: '/criar-videos',
                   replaceAll: false,
                 );
                 return;
@@ -44,22 +43,21 @@ Future<String?> showCreateFolderModal(BuildContext context) {
               // 3) tenta salvar (com await)
               try {
                 await db.createFolder(nome);
-
+                Navigator.pop(ctx, null);
                 await showResultModal(
                   context,
                   type: ResultType.success,
                   title: 'Sucesso!',
                   message: 'Pasta criada com sucesso.',
-                  goToRoute: '/criar-videos',
                   replaceAll: false,
                 );
               } catch (e) {
+                Navigator.pop(ctx, null);
                 await showResultModal(
                   context,
                   type: ResultType.error,
                   title: 'Erro',
                   message: 'Algo deu errado ao criar a pasta',
-                  goToRoute: '/criar-videos',
                   replaceAll: false,
                 );
               }

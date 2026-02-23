@@ -7,7 +7,6 @@ Future<void> showResultModal(
   required ResultType type,
   required String title,
   required String message,
-  required String goToRoute,
   Object? routeArgs,
   bool replaceAll = false, // se true, limpa a pilha e vai pra rota
 }) {
@@ -32,21 +31,7 @@ Future<void> showResultModal(
         actions: [
           ElevatedButton(
             onPressed: () {
-              // fecha o dialog primeiro
-              Navigator.of(ctx).pop();
-
-              // navega para a rota desejada
-              if (replaceAll) {
-                Navigator.of(context).pushNamedAndRemoveUntil(
-                  goToRoute,
-                  (route) => false,
-                  arguments: routeArgs,
-                );
-              } else {
-                Navigator.of(
-                  context,
-                ).pushReplacementNamed(goToRoute, arguments: routeArgs);
-              }
+              Navigator.pushReplacementNamed(context, '/criar_treinamento');
             },
             child: const Text('Fechar'),
           ),
